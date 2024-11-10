@@ -1,64 +1,62 @@
 import matplotlib.pyplot as plt
 
-def sutherland_hodgman_clip(polygon, clip_window):
+def sutherland_hodgman_line_clip(line, clip_window):
+    def inside(point, edge_start, edge_end):
+        # Check if the point is inside the clipping window (on the correct side of the edge)
+        return (edge_end[0] - edge_start[0]) * (point[1] - edge_start[1]) > (edge_end[1] - edge_start[1]) * (point[0] - edge_start[0])
+
+    def intersection(p1, p2, edge_start, edge_end):
+        # Find the intersection point of two lines
+        x1, y1 = p1
+        x2, y2 = p2
+        x3, y3 = edge_start
+        x4, y4 = edge_end
+
+        a1, b1, c1 = y2 - y1, x1 - x2, (y2 - y1) * x1 + (x1 - x2) * y1
+        a2, b2, c2 = y4 - y3, x3 - x4, (y4 - y3) * x3 + (x3 - x4) * y3
+        det = a1 * b2 - a2 * b1
+        if det == 0:  # Parallel lines
+            return None
+        # Calculate intersection point
+        return ((b2 * c1 - b1 * c2) / det, (a1 * c2 - a2 * c1) / det)
+
+    # Clip the line segment against each edge of the clipping window
+    clipped_line = [line[0], line[1]]  # Start with the original line
     for i in range(len(clip_window)):
-        edge_start = clip_window[i]
-        edge_end = clip_window[(i + 1) % len(clip_window)]
-        polygon = clip_with_edge(polygon, edge_start, edge_end)
-    return polygon
+        edge_start, edge_end = clip_window[i], clip_window[(i + 1) % len(clip_window)]
+        new_line = []
+        p1, p2 = clipped_line[0], clipped_line[1]
+        
+        # Check if both points are inside or outside the clipping edge
+        if inside(p1, edge_start, edge_end):
+            new_line.append(p1)
+        if inside(p2, edge_start, edge_end):
+            new_line.append(p2)
+        if len(new_line) == 2:  # Both points inside, no intersection needed
+            clipped_line = new_line
+        elif len(new_line) == 1:  # One point inside, find intersection
+            intersection_point = intersection(p1, p2, edge_start, edge_end)
+            if intersection_point:
+                new_line.append(intersection_point)
+            clipped_line = new_line
 
-def clip_with_edge(polygon, edge_start, edge_end):
-    new_polygon = []
-    for j in range(len(polygon)):
-        current_point = polygon[j]
-        previous_point = polygon[j - 1]
+    return clipped_line
 
-        if is_inside(current_point, edge_start, edge_end):
-            if not is_inside(previous_point, edge_start, edge_end):
-                new_polygon.append(find_intersection(previous_point, current_point, edge_start, edge_end))
-            new_polygon.append(current_point)
-        elif is_inside(previous_point, edge_start, edge_end):
-            new_polygon.append(find_intersection(previous_point, current_point, edge_start, edge_end))
+# Example line and clipping window
+line = [(50, 150), (350, 200)]  # A line from (50, 150) to (350, 200)
+clip_window = [(100, 100), (300, 100), (300, 200), (100, 200)]  # A rectangular clipping window
 
-    return new_polygon
+# Clipping the line
+clipped_line = sutherland_hodgman_line_clip(line, clip_window)
 
-def is_inside(point, edge_start, edge_end):
-    x, y = point
-    x1, y1 = edge_start
-    x2, y2 = edge_end
-    return (x2 - x1) * (y - y1) > (y2 - y1) * (x - x1)
-
-def find_intersection(p1, p2, edge_start, edge_end):
-    x1, y1 = p1
-    x2, y2 = p2
-    x3, y3 = edge_start
-    x4, y4 = edge_end
-
-    # Calculate line equations and find intersection
-    a1, b1, c1 = y2 - y1, x1 - x2, (y2 - y1) * x1 + (x1 - x2) * y1
-    a2, b2, c2 = y4 - y3, x3 - x4, (y4 - y3) * x3 + (x3 - x4) * y3
-    det = a1 * b2 - a2 * b1
-
-    if det == 0:
-        return None
-    x = (b2 * c1 - b1 * c2) / det
-    y = (a1 * c2 - a2 * c1) / det
-    return (x, y)
-
-# Example Usage
-polygon = [(50, 150), (200, 250), (350, 200), (300, 100), (200, 50), (100, 100)]
-clip_window = [(100, 100), (300, 100), (300, 200), (100, 200)]
-
-# Clip the polygon
-clipped_polygon = sutherland_hodgman_clip(polygon, clip_window)
-
-# Plotting the original and clipped polygons
-plt.plot(*zip(*(polygon + [polygon[0]])), 'b-', label="Original Polygon")
+# Plotting
+plt.plot(*zip(*(line + [line[0]])), 'b-', label="Original Line")
 plt.plot(*zip(*(clip_window + [clip_window[0]])), 'r--', label="Clipping Window")
-plt.plot(*zip(*(clipped_polygon + [clipped_polygon[0]])), 'g-', label="Clipped Polygon")
+if clipped_line:
+    plt.plot(*zip(*(clipped_line + [clipped_line[0]])), 'g-', label="Clipped Line")
 plt.xlabel("X")
 plt.ylabel("Y")
 plt.legend()
 plt.grid(True)
-plt.title("Sutherland-Hodgman Polygon Clipping")
+plt.title("Sutherland-Hodgman Line Clipping")
 plt.show()
