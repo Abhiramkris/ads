@@ -1,0 +1,21 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+fig, ax = plt.subplots()
+ax.set(xlim=(0, 10), ylim=(0, 10))
+ball = plt.Circle((0.5, 0.5), 0.5, color='red')
+ax.add_patch(ball)
+
+speed_x, speed_y = 0.4, 0.05
+
+def update(frame):
+    x, y = ball.center
+    x += speed_x; y += speed_y
+    if not (0.5 < x < 9.5): globals()['speed_x'] *= -1
+    if not (0.5 < y < 9.5): globals()['speed_y'] *= -1
+    ball.set_center((x, y))
+    return ball,
+
+ani = FuncAnimation(fig, update, frames=1000, interval=20, blit=True)
+plt.show()
