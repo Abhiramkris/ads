@@ -1,0 +1,15 @@
+ import cv2
+ import numpy as np
+ import matplotlib.pyplot as plt
+ image = cv2.imread("1.jpeg",cv2.IMREAD_GRAYSCALE)
+ normalized_image = image / 255.0
+ gamma = 2.0
+ c = 1
+ power_law_transformed = c * np.power(normalized_image, gamma)
+ power_law_transformed = np.uint8(power_law_transformed * 255)
+ plt.figure(figsize=(12, 6))
+ plt.subplot(1, 2, 1)
+ plt.imshow(image, cmap="gray"),
+ plt.subplot(1, 2, 2)
+ plt.imshow(power_law_transformed, cmap="gray"),
+ plt.show(
