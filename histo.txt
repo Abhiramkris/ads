@@ -1,0 +1,21 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+def enhance_contrast(image):
+    cdf = np.cumsum(np.histogram(image, bins=256, range=(0, 256))[0])
+    cdf_normalized = np.ma.masked_equal(cdf, 0)  # Mask zeros
+    cdf_normalized = (cdf_normalized - cdf_normalized.min()) * 255 / (cdf_normalized.max() - cdf_normalized.min())
+    return cdf_normalized.filled(0)[image].astype('uint8')
+
+# Load image in grayscale
+image = cv2.imread('C:\Work\CODE\py\kitty.jpg', cv2.IMREAD_GRAYSCALE)  # Replace with your image path
+
+# Enhance contrast
+enhanced_image = enhance_contrast(image)
+
+# Plot original and enhanced images
+plt.figure(figsize=(10, 5))
+plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Original Image'), plt.axis('off')
+plt.subplot(1, 2, 2), plt.imshow(enhanced_image, cmap='gray'), plt.title('Enhanced Image'), plt.axis('off')
+plt.show()
