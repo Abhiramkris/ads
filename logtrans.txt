@@ -1,0 +1,13 @@
+ import cv2
+ import numpy as np
+ import matplotlib.pyplot as plt
+ image = cv2.imread("1.jpeg",cv2.IMREAD_GRAYSCALE)
+ c = 255 / np.log(1 + np.max(image))
+ log_transformed = c * np.log(1 + image)
+ log_transformed = np.array(log_transformed, dtype=np.uint8)
+ plt.figure(figsize=(12, 6))
+ plt.subplot(1, 2, 1),
+ plt.imshow(image, cmap="gray"),
+ plt.subplot(1, 2, 2),
+ plt.imshow(log_transformed, cmap="gray"),
+ plt.show()
