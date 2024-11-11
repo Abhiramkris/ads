@@ -57,19 +57,22 @@ line = (70, 20, 90, 30)
 
 # Perform line clipping
 clipped_line = cohen_sutherland_clip(*line)
-
 # Plot results
 plt.plot([line[0], line[2]], [line[1], line[3]], 'r-', label="Original Line")
 if clipped_line:
     plt.plot([clipped_line[0][0], clipped_line[1][0]], [clipped_line[0][1], clipped_line[1][1]], 'g-', label="Clipped Line")
-plt.axvline(x=xmin, color='black')
-plt.axvline(x=xmax, color='black')
-plt.axhline(y=ymin, color='black')
-plt.axhline(y=ymax, color='black')
+
+# Draw clipping window boundaries
+for x in [xmin, xmax]:
+    plt.axvline(x=x, color='black')
+for y in [ymin, ymax]:
+    plt.axhline(y=y, color='black')
+
+# Configure plot appearance
 plt.xlim(0, 100)
 plt.ylim(0, 50)
-plt.legend()
 plt.xlabel("X-axis")
 plt.ylabel("Y-axis")
+plt.legend()
 plt.title("Cohen-Sutherland Line Clipping")
 plt.show()
